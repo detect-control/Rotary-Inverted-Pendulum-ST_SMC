@@ -33,7 +33,7 @@ volatile double theta = 0.0f;
 volatile long encoderCount = 0;
 volatile int motorLastEncoded = 0;
 
-// YT3806 encoder state - YOUR PROVEN INTERRUPT METHOD
+// YT3806 encoder state 
 volatile long yt3806EncoderCount = 0;
 volatile int lastYT3806Encoded = 0;
 
@@ -42,7 +42,7 @@ unsigned long lastEncoderCheck = 0;
 int debugCounter = 0;
 
 
-// YT3806 INTERRUPT HANDLER - YOUR PROVEN WORKING METHOD
+// YT3806 INTERRUPT HANDLER 
 void updateYT3806Encoder() {
     int MSB = digitalRead(YT3806_ENCODER_A_PIN);
     int LSB = digitalRead(YT3806_ENCODER_B_PIN);
@@ -140,7 +140,6 @@ void setup() {
     delay(3000);
     
     Serial.println("HYBRID SOLUTION!");
-    Serial.println("YT3806: Your proven interrupt method");
     Serial.println("Motor: Optimized fast polling");
   
     
@@ -162,7 +161,7 @@ void setup() {
     motorLastEncoded = (digitalRead(ENCODER_PIN_A) << 1) | digitalRead(ENCODER_PIN_B);
     lastYT3806Encoded = (digitalRead(YT3806_ENCODER_A_PIN) << 1) | digitalRead(YT3806_ENCODER_B_PIN);
     
-    // Setup YT3806 interrupts - YOUR PROVEN METHOD
+    // Setup YT3806 interrupts
     attachInterrupt(digitalPinToInterrupt(YT3806_ENCODER_A_PIN), updateYT3806Encoder, CHANGE);
     attachInterrupt(digitalPinToInterrupt(YT3806_ENCODER_B_PIN), updateYT3806Encoder, CHANGE);
     
@@ -182,11 +181,8 @@ void setup() {
 // MAIN LOOP - FAST POLLING
 void loop() {
     // Read motor encoder as fast as possible (polling - may miss some pulses at high speed)
-    if (micros() - lastEncoderCheck >= 50) {  // Even faster - every 50 microseconds
-        lastEncoderCheck = micros();
-        readMotorEncoder();
-        debugCounter++;
-    }
+    
+    readMotorEncoder();
     
     // Control loop every 1ms
     static unsigned long lastControlTime = 0;

@@ -26,18 +26,19 @@ params.p5 = (1/12 * params.mp) * params.lp^2;
 %% Controller Parameters
 controller.c1 = 16;   % Sliding surface coefficient (proportional)
 controller.c2 = 79;   % Sliding surface coefficient (integral)
-controller.k = 370;  
+controller.k1 = 60;
+controller.k2 = 1;
 controller.n = 0.1;     % tanh boundary layer parameter
 
 %% Simulation Settings with RK4
 h = 0.01;            % Step size
 t = 0:h:10;           % Time vector
 nSteps = length(t);   % Number of steps
-X = zeros(nSteps, 5); % State matrix [phi, theta, phi_dot, theta_dot, int_e, int_tanh]
+X = zeros(nSteps, 6); % State matrix [phi, theta, phi_dot, theta_dot, int_e, int_tanh]
 tauPhi = zeros(nSteps, 1); % Control input vector
 
 % Initial state
-X(1,:) = [0; 0.2; 0; 0; 0]; 
+X(1,:) = [0; 0.2; 0; 0; 0; 0]; 
 
 %% RK4 Integration Loop
 for i = 1:nSteps-1
@@ -111,6 +112,7 @@ function [dXdt, tauPhi] = pendulumDynamics(t, X, params, ctrl)
     phiDot = X(3);
     thetaDot = X(4);
     intE = X(5);
+    intSign = X(6);
     
     % Calculate sliding surface s
     e = theta; 
@@ -151,7 +153,7 @@ function [dXdt, tauPhi] = pendulumDynamics(t, X, params, ctrl)
     
     % Super-Twisting control law
     tauPhi = (1/g) * ( (f + ctrl.c1 * thetaDot + ctrl.c2 * e) ...
-        + ctrl.k * sqrt(abs(s)) * tanh(s / ctrl.n));
+        + ctrl.k1 * sqrt(abs(s)) * sign(s)) + ctrl.k2 * intSign;
 
     tauPhi = max(min(tauPhi, 2), -2);
 
@@ -164,5 +166,6 @@ function [dXdt, tauPhi] = pendulumDynamics(t, X, params, ctrl)
     
     % State derivatives
     dIntE = theta;                  % d/dt(∫e) = theta
-    dXdt = [phiDot; thetaDot; phiDDot; thetaDDot; dIntE];
+    intSign = sign(s);
+    dXdt = [phiDot; thetaDot; phiDDot; thetaDDot; dIntE; intSign];
 end
